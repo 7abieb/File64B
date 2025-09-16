@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Encrypt/Decrypt Tool - Base64 with High Compression ZIP</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -14,61 +15,88 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             padding: 20px;
             color: #333;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: white;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
         }
 
         .header h1 {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
         }
 
         .tabs {
             display: flex;
-            background: #f8f9fa;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .tab-button {
             flex: 1;
-            padding: 15px;
+            padding: 16px 20px;
             border: none;
-            background: #f8f9fa;
+            background: #f8fafc;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .tab-button.active {
             background: white;
-            border-bottom-color: #4facfe;
-            color: #4facfe;
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+            font-weight: 600;
         }
 
         .tab-content {
-            padding: 30px;
+            padding: 32px;
             display: none;
         }
 
         .tab-content.active {
             display: block;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-desc {
+            color: #64748b;
+            margin-bottom: 24px;
+            font-size: 14px;
         }
 
         .file-input-wrapper {
@@ -87,131 +115,191 @@
         }
 
         .file-label {
-            display: block;
-            padding: 15px;
-            border: 2px dashed #4facfe;
-            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
             text-align: center;
-            background: #f8f9fa;
-            transition: all 0.3s;
+            background: #f8fafc;
+            transition: all 0.3s ease;
             cursor: pointer;
+            font-size: 14px;
+            color: #64748b;
         }
 
         .file-label:hover {
-            background: #e3f2fd;
-            border-color: #2196f3;
+            background: #e2e8f0;
+            border-color: #4f46e5;
+            color: #4f46e5;
         }
 
         .btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s;
-            margin: 10px 5px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin: 8px 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
         .btn-high-comp {
-            background: linear-gradient(135deg, #388e3c 0%, #66bb6a 100%);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         }
 
         .btn-high-comp:hover {
-            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
         }
 
         .textarea {
             width: 100%;
-            height: 200px;
-            padding: 15px;
-            border: 2px solid #ddd;
+            height: 180px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
             resize: vertical;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
         }
 
         .output {
             margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
+            padding: 16px;
+            background: #f8fafc;
             border-radius: 8px;
-            border-left: 4px solid #4facfe;
+            border-left: 4px solid #4f46e5;
         }
 
         .file-list {
             list-style: none;
             padding: 0;
+            margin: 16px 0;
         }
 
         .file-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            margin: 5px 0;
+            padding: 12px;
+            margin: 8px 0;
             background: white;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .error {
-            color: #d32f2f;
-            background: #ffebee;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            color: #dc2626;
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .success {
-            color: #388e3c;
-            background: #e8f5e8;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            color: #059669;
+            background: #f0fdf4;
+            border-left: 4px solid #059669;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            padding: 12px;
+            margin: 16px 0;
+            border-radius: 6px;
+            color: #92400e;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .progress {
             width: 100%;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
             overflow: hidden;
-            margin: 10px 0;
+            margin: 16px 0;
         }
 
         .progress-bar {
             height: 100%;
-            background: #4facfe;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
             width: 0%;
-            transition: width 0.3s;
+            transition: width 0.3s ease;
         }
 
-        .note {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-group .file-input-wrapper {
+            flex: 1;
+        }
+
+        .input-group .textarea-wrapper {
+            flex: 2;
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
             .container {
-                margin: 10px;
-                border-radius: 10px;
+                margin: 0;
+                border-radius: 8px;
             }
 
             .tabs {
@@ -224,7 +312,28 @@
             }
 
             .tab-button.active {
-                border-right-color: #4facfe;
+                border-right-color: transparent;
+                border-bottom-color: #4f46e5;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .file-item > div {
+                width: 100%;
+                display: flex;
+                gap: 8px;
             }
         }
     </style>
@@ -232,46 +341,62 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔒 Encrypt/Decrypt Tool</h1>
-            <p>Handle any files (MP3, PNG, ZIP, etc.) up to 10MB: High Compression ZIP (Level 9) + Base64 Encode/Decode</p>
+            <h1><i class="fas fa-lock"></i> Encrypt/Decrypt Tool</h1>
+            <p>Handle files (MP3, PNG, ZIP, etc.) up to 10MB: High Compression ZIP + Base64</p>
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="switchTab('encrypt')">Encrypt (File → High Comp Base64)</button>
-            <button class="tab-button" onclick="switchTab('decrypt')">Decrypt (Base64 → File)</button>
+            <button class="tab-button active" onclick="switchTab('encrypt')">
+                <i class="fas fa-lock"></i> Encrypt
+            </button>
+            <button class="tab-button" onclick="switchTab('decrypt')">
+                <i class="fas fa-unlock"></i> Decrypt
+            </button>
         </div>
 
         <div id="encrypt" class="tab-content active">
-            <h2>Encrypt a File (High Compression)</h2>
-            <p>Select any file (MP3, PNG, ZIP, etc. - max 10MB). It will be zipped with high compression (level 9) and encoded to Base64.</p>
+            <h2 class="section-title"><i class="fas fa-file-archive"></i> Encrypt a File</h2>
+            <p class="section-desc">Select any file (max 10MB). It will be zipped with high compression and Base64 encoded.</p>
             <div class="note">
-                High compression (level 9) maximizes size reduction but may take a few seconds for large files—no browser overload.
+                <i class="fas fa-info-circle"></i>
+                High compression (level 9) reduces size but may take a few seconds for large files.
             </div>
             <div class="file-input-wrapper">
                 <input type="file" id="encryptFile" class="file-input" accept="*/*" onchange="handleEncryptFileSelect(event)">
-                <label for="encryptFile" class="file-label">Choose File (Max 10MB) or Drag & Drop</label>
+                <label for="encryptFile" class="file-label">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose File or Drag & Drop (Max 10MB)
+                </label>
             </div>
             <div id="encryptProgress" class="progress" style="display: none;">
                 <div class="progress-bar" id="encryptProgressBar"></div>
             </div>
-            <button id="encryptBtn" class="btn-high-comp" disabled onclick="encryptFile(9)">Encrypt to High Comp Base64</button>
+            <button id="encryptBtn" class="btn btn-high-comp" disabled onclick="encryptFile(9)">
+                <i class="fas fa-rocket"></i> Encrypt to High Comp Base64
+            </button>
             <div id="encryptOutput"></div>
         </div>
 
         <div id="decrypt" class="tab-content">
-            <h2>Decrypt Base64</h2>
-            <p>Paste Base64 code or upload a .b64 file (works for any file type inside). It will be decoded and unzipped.</p>
+            <h2 class="section-title"><i class="fas fa-file-code"></i> Decrypt Base64</h2>
+            <p class="section-desc">Paste Base64 or upload .b64 file. It will be decoded and unzipped.</p>
             <div class="note">
-                After decryption, re-encrypt uses high compression (level 9) for optimal size reduction—efficient and no RAM overload.
+                <i class="fas fa-lightbulb"></i>
+                Re-encryption uses high compression for optimal size reduction.
             </div>
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <div style="flex: 1;">
-                    <label for="decryptBase64File" class="file-label" style="padding: 10px; font-size: 14px;">Upload .b64 File</label>
-                    <input type="file" id="decryptBase64File" class="file-input" accept=".b64,text/plain" onchange="handleDecryptFileSelect(event)" style="width: 100%; height: 40px; opacity: 0; position: absolute;">
+            <div class="input-group">
+                <div class="file-input-wrapper">
+                    <input type="file" id="decryptBase64File" class="file-input" accept=".b64,text/plain" onchange="handleDecryptFileSelect(event)">
+                    <label for="decryptBase64File" class="file-label">
+                        <i class="fas fa-upload"></i> Upload .b64 File
+                    </label>
                 </div>
-                <textarea id="decryptTextarea" class="textarea" placeholder="Paste Base64 code here..."></textarea>
+                <div class="textarea-wrapper">
+                    <textarea id="decryptTextarea" class="textarea" placeholder="Or paste Base64 code here..."></textarea>
+                </div>
             </div>
-            <button id="decryptBtn" class="btn" onclick="decryptBase64()">Decrypt & Unzip</button>
+            <button id="decryptBtn" class="btn" onclick="decryptBase64()">
+                <i class="fas fa-magic"></i> Decrypt & Unzip
+            </button>
             <div id="decryptProgress" class="progress" style="display: none;">
                 <div class="progress-bar" id="decryptProgressBar"></div>
             </div>
@@ -282,14 +407,14 @@
     <script>
         let selectedEncryptFile = null;
         let selectedDecryptBase64 = '';
-        let extractedFiles = []; // Store extracted files for re-encryption
+        let extractedFiles = [];
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
             document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            this.classList.add('active'); // 'this' refers to the clicked button
 
             document.getElementById('encryptOutput').innerHTML = '';
             document.getElementById('decryptOutput').innerHTML = '';
@@ -301,7 +426,7 @@
             if (!file) return;
 
             if (file.size > 10 * 1024 * 1024) {
-                showError('encryptOutput', 'File too large! Maximum size is 10MB.');
+                showError('encryptOutput', '<i class="fas fa-exclamation-triangle"></i> File too large! Maximum size is 10MB.');
                 document.getElementById('encryptFile').value = '';
                 selectedEncryptFile = null;
                 document.getElementById('encryptBtn').disabled = true;
@@ -310,17 +435,17 @@
 
             selectedEncryptFile = file;
             document.getElementById('encryptBtn').disabled = false;
-            showSuccess('encryptOutput', `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            showSuccess('encryptOutput', `<i class="fas fa-check-circle"></i> Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
         }
 
-        async function encryptFile(compressionLevel = 9) { // Default to high compression
+        async function encryptFile(compressionLevel = 9) {
             if (!selectedEncryptFile) return;
 
             const btn = document.getElementById('encryptBtn');
             const progress = document.getElementById('encryptProgress');
             const progressBar = document.getElementById('encryptProgressBar');
             btn.disabled = true;
-            btn.textContent = `Encrypting (High Comp Level ${compressionLevel})...`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Encrypting (Level ${compressionLevel})...`;
             progress.style.display = 'block';
             progressBar.style.width = '0%';
 
@@ -330,12 +455,11 @@
 
                 const zip = new JSZip();
                 zip.file(selectedEncryptFile.name, arrayBuffer, { compression: 'DEFLATE', compressionOptions: { level: compressionLevel } });
-                progressBar.style.width = '50%'; // Compression starts here - async, so progress is approximate
+                progressBar.style.width = '50%';
 
                 const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
-                    // Update progress during generation (compression phase)
                     if (metadata.percent) {
-                        progressBar.style.width = Math.min((20 + metadata.percent * 0.6).toFixed(0) + '%'); // 20-80% for compression
+                        progressBar.style.width = Math.min((20 + metadata.percent * 0.6).toFixed(0) + '%');
                     }
                 });
                 progressBar.style.width = '90%';
@@ -347,25 +471,29 @@
 
                     const output = document.getElementById('encryptOutput');
                     output.innerHTML = `
-                        <div class="success">High Compression Encryption successful (Level ${compressionLevel})!</div>
+                        <div class="success"><i class="fas fa-check"></i> High Compression Encryption successful (Level ${compressionLevel})!</div>
                         <textarea class="textarea" readonly>${base64}</textarea>
-                        <button class="btn" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy Base64</button>
-                        <a id="downloadB64" download="${selectedEncryptFile.name}_high_comp.b64" class="btn" style="text-decoration: none;">Download as .b64</a>
+                        <button class="btn btn-secondary" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-copy"></i> Copy Base64
+                        </button>
+                        <a id="downloadB64" download="${selectedEncryptFile.name}_high_comp.b64" class="btn" style="text-decoration: none;">
+                            <i class="fas fa-download"></i> Download .b64
+                        </a>
                     `;
                     document.getElementById('downloadB64').href = `data:text/plain;base64,${base64}`;
 
                     setTimeout(() => {
                         progress.style.display = 'none';
                         progressBar.style.width = '0%';
-                        btn.textContent = 'Encrypt to High Comp Base64';
+                        btn.innerHTML = '<i class="fas fa-rocket"></i> Encrypt to High Comp Base64';
                         btn.disabled = false;
                     }, 1000);
                 };
                 reader.readAsDataURL(zipBlob);
             } catch (error) {
-                showError('encryptOutput', 'Encryption failed: ' + error.message + ' (High compression may take longer).');
+                showError('encryptOutput', '<i class="fas fa-times-circle"></i> Encryption failed: ' + error.message);
                 btn.disabled = false;
-                btn.textContent = 'Encrypt to High Comp Base64';
+                btn.innerHTML = '<i class="fas fa-rocket"></i> Encrypt to High Comp Base64';
                 progress.style.display = 'none';
                 progressBar.style.width = '0%';
             }
@@ -388,12 +516,12 @@
         async function decryptBase64() {
             let base64 = document.getElementById('decryptTextarea').value.trim();
             if (!base64) {
-                showError('decryptOutput', 'Please paste Base64 code or upload a file.');
+                showError('decryptOutput', '<i class="fas fa-exclamation-triangle"></i> Please paste Base64 or upload a file.');
                 return;
             }
 
             if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64.replace(/\s/g, ''))) {
-                showError('decryptOutput', 'Invalid Base64 format.');
+                showError('decryptOutput', '<i class="fas fa-exclamation-triangle"></i> Invalid Base64 format.');
                 return;
             }
 
@@ -401,7 +529,7 @@
             const progress = document.getElementById('decryptProgress');
             const progressBar = document.getElementById('decryptProgressBar');
             btn.disabled = true;
-            btn.textContent = 'Decrypting...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Decrypting...';
             progress.style.display = 'block';
             progressBar.style.width = '0%';
 
@@ -419,7 +547,7 @@
                 const zip = await JSZip.loadAsync(arrayBuffer);
                 progressBar.style.width = '70%';
 
-                extractedFiles = []; // Reset
+                extractedFiles = [];
                 zip.forEach((relativePath, file) => {
                     extractedFiles.push({ name: relativePath, file: file });
                 });
@@ -431,23 +559,34 @@
                 progressBar.style.width = '100%';
 
                 const output = document.getElementById('decryptOutput');
-                let fileListHtml = `<div class="success">Decryption successful! Found ${extractedFiles.length} file(s) (any type: MP3, PNG, ZIP, etc.):</div><ul class="file-list">`;
+                let fileListHtml = `<div class="success"><i class="fas fa-check"></i> Decryption successful! Found ${extractedFiles.length} file(s):</div><ul class="file-list">`;
                 extractedFiles.forEach((f, index) => {
-                    fileListHtml += `<li class="file-item">
-                        <span>${f.name}</span>
-                        <div>
-                            <button class="btn" onclick="viewBase64(${index})">View as Base64</button>
-                            <button class="btn" onclick="downloadFile(${index})">Download</button>
-                        </div>
-                    </li>`;
+                    fileListHtml += `
+                        <li class="file-item">
+                            <span><i class="fas fa-file"></i> ${f.name}</span>
+                            <div>
+                                <button class="btn btn-secondary" onclick="viewBase64(${index})">
+                                    <i class="fas fa-eye"></i> View Base64
+                                </button>
+                                <button class="btn" onclick="downloadFile(${index})">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </li>
+                    `;
                 });
                 fileListHtml += '</ul>';
 
-                // Buttons for outputs (high comp by default)
                 fileListHtml += `
                     <div style="margin-top: 20px;">
-                        ${extractedFiles.length > 1 ? `<button class="btn-high-comp" onclick="downloadAll(9)">Download All as High Comp ZIP (Level 9)</button>` : ''}
-                        <button class="btn-high-comp" onclick="encryptOutputFiles(9)">Encrypt Output (High Comp ZIP + Base64)</button>
+                        ${extractedFiles.length > 1 ? `
+                            <button class="btn btn-high-comp" onclick="downloadAll(9)">
+                                <i class="fas fa-archive"></i> Download All as High Comp ZIP
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-high-comp" onclick="encryptOutputFiles(9)">
+                            <i class="fas fa-rocket"></i> Re-Encrypt (High Comp + Base64)
+                        </button>
                     </div>
                 `;
 
@@ -456,19 +595,19 @@
                 setTimeout(() => {
                     progress.style.display = 'none';
                     progressBar.style.width = '0%';
-                    btn.textContent = 'Decrypt & Unzip';
+                    btn.innerHTML = '<i class="fas fa-magic"></i> Decrypt & Unzip';
                     btn.disabled = false;
                 }, 1000);
             } catch (error) {
-                showError('decryptOutput', 'Decryption failed: ' + error.message + '. Ensure the Base64 is a valid zipped file.');
+                showError('decryptOutput', '<i class="fas fa-times-circle"></i> Decryption failed: ' + error.message);
                 btn.disabled = false;
-                btn.textContent = 'Decrypt & Unzip';
+                btn.innerHTML = '<i class="fas fa-magic"></i> Decrypt & Unzip';
                 progress.style.display = 'none';
                 progressBar.style.width = '0%';
             }
         }
 
-        // Re-encrypt extracted files with high compression
+        // Re-encrypt extracted files
         async function encryptOutputFiles(compressionLevel = 9) {
             if (extractedFiles.length === 0) return;
 
@@ -484,11 +623,11 @@
                     const content = await f.file.async('uint8array');
                     zip.file(f.name, content, { compression: 'DEFLATE', compressionOptions: { level: compressionLevel } });
                 }
-                progressBar.style.width = '50%'; // Before generation
+                progressBar.style.width = '50%';
 
                 const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
                     if (metadata.percent) {
-                        progressBar.style.width = (50 + metadata.percent * 0.4).toFixed(0) + '%'; // 50-90% for compression
+                        progressBar.style.width = (50 + metadata.percent * 0.4).toFixed(0) + '%';
                     }
                 });
                 progressBar.style.width = '100%';
@@ -497,12 +636,15 @@
                 reader.onload = function() {
                     const base64 = reader.result.split(',')[1];
 
-                    // Append to output (don't replace file list)
                     output.innerHTML += `
-                        <div class="success" style="margin-top: 20px;">Re-encryption successful (High Comp Level ${compressionLevel})!</div>
+                        <div class="success" style="margin-top: 20px;"><i class="fas fa-check"></i> Re-encryption successful (Level ${compressionLevel})!</div>
                         <textarea class="textarea" readonly style="margin-top: 10px;">${base64}</textarea>
-                        <button class="btn" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy Base64</button>
-                        <a id="downloadReEncryptB64" download="re_encrypted_high_comp.b64" class="btn" style="text-decoration: none;">Download as .b64</a>
+                        <button class="btn btn-secondary" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-copy"></i> Copy Base64
+                        </button>
+                        <a id="downloadReEncryptB64" download="re_encrypted_high_comp.b64" class="btn" style="text-decoration: none;">
+                            <i class="fas fa-download"></i> Download .b64
+                        </a>
                     `;
                     document.getElementById('downloadReEncryptB64').href = `data:text/plain;base64,${base64}`;
 
@@ -513,7 +655,7 @@
                 };
                 reader.readAsDataURL(zipBlob);
             } catch (error) {
-                showError('decryptOutput', 'Re-encryption failed: ' + error.message + ' (High compression may take longer for large files).');
+                showError('decryptOutput', '<i class="fas fa-times-circle"></i> Re-encryption failed: ' + error.message);
                 progress.style.display = 'none';
                 progressBar.style.width = '0%';
             }
@@ -532,7 +674,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                showSuccess('encryptOutput', 'Base64 copied to clipboard!') || showSuccess('decryptOutput', 'Base64 copied to clipboard!');
+                showSuccess('encryptOutput', '<i class="fas fa-check"></i> Base64 copied to clipboard!') || showSuccess('decryptOutput', '<i class="fas fa-check"></i> Base64 copied to clipboard!');
             }).catch(() => {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
@@ -540,7 +682,7 @@
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showSuccess('encryptOutput', 'Base64 copied to clipboard!') || showSuccess('decryptOutput', 'Base64 copied to clipboard!');
+                showSuccess('encryptOutput', '<i class="fas fa-check"></i> Base64 copied to clipboard!') || showSuccess('decryptOutput', '<i class="fas fa-check"></i> Base64 copied to clipboard!');
             });
         }
 
@@ -549,12 +691,14 @@
             const content = await f.file.async('uint8array');
             const base64 = btoa(String.fromCharCode.apply(null, content));
             const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;';
             modal.innerHTML = `
-                <div style="background:white;padding:20px;border-radius:10px;max-width:80%;max-height:80%;overflow:auto;">
-                    <h3>Base64 for ${f.name}</h3>
-                    <textarea style="width:100%;height:200px;font-family:monospace;" readonly>${base64}</textarea>
-                    <button class="btn" onclick="this.parentElement.parentElement.remove(); copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy & Close</button>
+                <div style="background:white;padding:24px;border-radius:12px;max-width:90%;max-height:90%;overflow:auto;">
+                    <h3><i class="fas fa-eye"></i> Base64 for ${f.name}</h3>
+                    <textarea style="width:100%;height:200px;font-family:monospace;font-size:11px;border:1px solid #e2e8f0;border-radius:6px;padding:8px;" readonly>${base64}</textarea>
+                    <button class="btn" onclick="this.parentElement.parentElement.remove(); copyToClipboard('${base64.replace(/'/g, "\\'")}')" style="margin-top:12px;">
+                        <i class="fas fa-copy"></i> Copy & Close
+                    </button>
                 </div>
             `;
             document.body.appendChild(modal);
@@ -606,7 +750,7 @@
                     progressBar.style.width = '0%';
                 }, 1000);
             } catch (error) {
-                showError('decryptOutput', 'Download failed: ' + error.message + ' (High compression may take longer).');
+                showError('decryptOutput', '<i class="fas fa-times-circle"></i> Download failed: ' + error.message);
                 progress.style.display = 'none';
                 progressBar.style.width = '0%';
             }
@@ -616,14 +760,17 @@
         const dropZone = document.querySelector('#encrypt .file-label');
         dropZone.addEventListener('dragover', e => {
             e.preventDefault();
-            dropZone.style.background = '#e3f2fd';
+            dropZone.style.background = '#e2e8f0';
+            dropZone.style.borderColor = '#4f46e5';
         });
         dropZone.addEventListener('dragleave', () => {
-            dropZone.style.background = '#f8f9fa';
+            dropZone.style.background = '#f8fafc';
+            dropZone.style.borderColor = '#cbd5e1';
         });
         dropZone.addEventListener('drop', e => {
             e.preventDefault();
-            dropZone.style.background = '#f8f9fa';
+            dropZone.style.background = '#f8fafc';
+            dropZone.style.borderColor = '#cbd5e1';
             const file = e.dataTransfer.files[0];
             if (file) {
                 const dt = new DataTransfer();
@@ -632,6 +779,16 @@
                 handleEncryptFileSelect({ target: { files: dt.files } });
             }
         });
+
+        // Fix for switchTab 'this' context (ensure it works with onclick)
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                switchTab.call(this, this.dataset.tab || event.target.closest('button').dataset.tab);
+            });
+        });
+        // Manually add data-tab for onclick compatibility
+        document.querySelector('[onclick="switchTab(\'encrypt\')"]').dataset.tab = 'encrypt';
+        document.querySelector('[onclick="switchTab(\'decrypt\')"]').dataset.tab = 'decrypt';
     </script>
 </body>
 </html>
