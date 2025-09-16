@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt/Decrypt Tool - Base64 with High Compression ZIP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            background: white;
+            border-bottom-color: #4facfe;
+            color: #4facfe;
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-label {
+            display: block;
+            padding: 15px;
+            border: 2px dashed #4facfe;
+            border-radius: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-label:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-high-comp {
+            background: linear-gradient(135deg, #388e3c 0%, #66bb6a 100%);
+        }
+
+        .btn-high-comp:hover {
+            transform: translateY(-2px);
+        }
+
+        .textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #388e3c;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .progress {
+            width: 100%;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #4facfe;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                border-bottom: none;
+                border-right: 3px solid transparent;
+            }
+
+            .tab-button.active {
+                border-right-color: #4facfe;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Encrypt/Decrypt Tool</h1>
+            <p>Handle any files (MP3, PNG, ZIP, etc.) up to 10MB: High Compression ZIP (Level 9) + Base64 Encode/Decode</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('encrypt')">Encrypt (File → High Comp Base64)</button>
+            <button class="tab-button" onclick="switchTab('decrypt')">Decrypt (Base64 → File)</button>
+        </div>
+
+        <div id="encrypt" class="tab-content active">
+            <h2>Encrypt a File (High Compression)</h2>
+            <p>Select any file (MP3, PNG, ZIP, etc. - max 10MB). It will be zipped with high compression (level 9) and encoded to Base64.</p>
+            <div class="note">
+                High compression (level 9) maximizes size reduction but may take a few seconds for large files—no browser overload.
+            </div>
+            <div class="file-input-wrapper">
+                <input type="file" id="encryptFile" class="file-input" accept="*/*" onchange="handleEncryptFileSelect(event)">
+                <label for="encryptFile" class="file-label">Choose File (Max 10MB) or Drag & Drop</label>
+            </div>
+            <div id="encryptProgress" class="progress" style="display: none;">
+                <div class="progress-bar" id="encryptProgressBar"></div>
+            </div>
+            <button id="encryptBtn" class="btn-high-comp" disabled onclick="encryptFile(9)">Encrypt to High Comp Base64</button>
+            <div id="encryptOutput"></div>
+        </div>
+
+        <div id="decrypt" class="tab-content">
+            <h2>Decrypt Base64</h2>
+            <p>Paste Base64 code or upload a .b64 file (works for any file type inside). It will be decoded and unzipped.</p>
+            <div class="note">
+                After decryption, re-encrypt uses high compression (level 9) for optimal size reduction—efficient and no RAM overload.
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="decryptBase64File" class="file-label" style="padding: 10px; font-size: 14px;">Upload .b64 File</label>
+                    <input type="file" id="decryptBase64File" class="file-input" accept=".b64,text/plain" onchange="handleDecryptFileSelect(event)" style="width: 100%; height: 40px; opacity: 0; position: absolute;">
+                </div>
+                <textarea id="decryptTextarea" class="textarea" placeholder="Paste Base64 code here..."></textarea>
+            </div>
+            <button id="decryptBtn" class="btn" onclick="decryptBase64()">Decrypt & Unzip</button>
+            <div id="decryptProgress" class="progress" style="display: none;">
+                <div class="progress-bar" id="decryptProgressBar"></div>
+            </div>
+            <div id="decryptOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedEncryptFile = null;
+        let selectedDecryptBase64 = '';
+        let extractedFiles = []; // Store extracted files for re-encryption
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            document.getElementById('encryptOutput').innerHTML = '';
+            document.getElementById('decryptOutput').innerHTML = '';
+        }
+
+        // Encrypt Section
+        function handleEncryptFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 10 * 1024 * 1024) {
+                showError('encryptOutput', 'File too large! Maximum size is 10MB.');
+                document.getElementById('encryptFile').value = '';
+                selectedEncryptFile = null;
+                document.getElementById('encryptBtn').disabled = true;
+                return;
+            }
+
+            selectedEncryptFile = file;
+            document.getElementById('encryptBtn').disabled = false;
+            showSuccess('encryptOutput', `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+        }
+
+        async function encryptFile(compressionLevel = 9) { // Default to high compression
+            if (!selectedEncryptFile) return;
+
+            const btn = document.getElementById('encryptBtn');
+            const progress = document.getElementById('encryptProgress');
+            const progressBar = document.getElementById('encryptProgressBar');
+            btn.disabled = true;
+            btn.textContent = `Encrypting (High Comp Level ${compressionLevel})...`;
+            progress.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            try {
+                const arrayBuffer = await selectedEncryptFile.arrayBuffer();
+                progressBar.style.width = '20%';
+
+                const zip = new JSZip();
+                zip.file(selectedEncryptFile.name, arrayBuffer, { compression: 'DEFLATE', compressionOptions: { level: compressionLevel } });
+                progressBar.style.width = '50%'; // Compression starts here - async, so progress is approximate
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    // Update progress during generation (compression phase)
+                    if (metadata.percent) {
+                        progressBar.style.width = Math.min((20 + metadata.percent * 0.6).toFixed(0) + '%'); // 20-80% for compression
+                    }
+                });
+                progressBar.style.width = '90%';
+
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const base64 = reader.result.split(',')[1];
+                    progressBar.style.width = '100%';
+
+                    const output = document.getElementById('encryptOutput');
+                    output.innerHTML = `
+                        <div class="success">High Compression Encryption successful (Level ${compressionLevel})!</div>
+                        <textarea class="textarea" readonly>${base64}</textarea>
+                        <button class="btn" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy Base64</button>
+                        <a id="downloadB64" download="${selectedEncryptFile.name}_high_comp.b64" class="btn" style="text-decoration: none;">Download as .b64</a>
+                    `;
+                    document.getElementById('downloadB64').href = `data:text/plain;base64,${base64}`;
+
+                    setTimeout(() => {
+                        progress.style.display = 'none';
+                        progressBar.style.width = '0%';
+                        btn.textContent = 'Encrypt to High Comp Base64';
+                        btn.disabled = false;
+                    }, 1000);
+                };
+                reader.readAsDataURL(zipBlob);
+            } catch (error) {
+                showError('encryptOutput', 'Encryption failed: ' + error.message + ' (High compression may take longer).');
+                btn.disabled = false;
+                btn.textContent = 'Encrypt to High Comp Base64';
+                progress.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        // Decrypt Section
+        function handleDecryptFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedDecryptBase64 = e.target.result.replace(/^data:text\/plain;base64,/, '').replace(/^data:application\/octet-stream;base64,/, '');
+                document.getElementById('decryptTextarea').value = selectedDecryptBase64;
+                document.getElementById('decryptBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function decryptBase64() {
+            let base64 = document.getElementById('decryptTextarea').value.trim();
+            if (!base64) {
+                showError('decryptOutput', 'Please paste Base64 code or upload a file.');
+                return;
+            }
+
+            if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64.replace(/\s/g, ''))) {
+                showError('decryptOutput', 'Invalid Base64 format.');
+                return;
+            }
+
+            const btn = document.getElementById('decryptBtn');
+            const progress = document.getElementById('decryptProgress');
+            const progressBar = document.getElementById('decryptProgressBar');
+            btn.disabled = true;
+            btn.textContent = 'Decrypting...';
+            progress.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            try {
+                progressBar.style.width = '30%';
+
+                const binaryString = atob(base64);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const arrayBuffer = bytes.buffer;
+                progressBar.style.width = '50%';
+
+                const zip = await JSZip.loadAsync(arrayBuffer);
+                progressBar.style.width = '70%';
+
+                extractedFiles = []; // Reset
+                zip.forEach((relativePath, file) => {
+                    extractedFiles.push({ name: relativePath, file: file });
+                });
+
+                if (extractedFiles.length === 0) {
+                    throw new Error('No files found in ZIP.');
+                }
+
+                progressBar.style.width = '100%';
+
+                const output = document.getElementById('decryptOutput');
+                let fileListHtml = `<div class="success">Decryption successful! Found ${extractedFiles.length} file(s) (any type: MP3, PNG, ZIP, etc.):</div><ul class="file-list">`;
+                extractedFiles.forEach((f, index) => {
+                    fileListHtml += `<li class="file-item">
+                        <span>${f.name}</span>
+                        <div>
+                            <button class="btn" onclick="viewBase64(${index})">View as Base64</button>
+                            <button class="btn" onclick="downloadFile(${index})">Download</button>
+                        </div>
+                    </li>`;
+                });
+                fileListHtml += '</ul>';
+
+                // Buttons for outputs (high comp by default)
+                fileListHtml += `
+                    <div style="margin-top: 20px;">
+                        ${extractedFiles.length > 1 ? `<button class="btn-high-comp" onclick="downloadAll(9)">Download All as High Comp ZIP (Level 9)</button>` : ''}
+                        <button class="btn-high-comp" onclick="encryptOutputFiles(9)">Encrypt Output (High Comp ZIP + Base64)</button>
+                    </div>
+                `;
+
+                output.innerHTML = fileListHtml;
+
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    btn.textContent = 'Decrypt & Unzip';
+                    btn.disabled = false;
+                }, 1000);
+            } catch (error) {
+                showError('decryptOutput', 'Decryption failed: ' + error.message + '. Ensure the Base64 is a valid zipped file.');
+                btn.disabled = false;
+                btn.textContent = 'Decrypt & Unzip';
+                progress.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        // Re-encrypt extracted files with high compression
+        async function encryptOutputFiles(compressionLevel = 9) {
+            if (extractedFiles.length === 0) return;
+
+            const progress = document.getElementById('decryptProgress');
+            const progressBar = document.getElementById('decryptProgressBar');
+            const output = document.getElementById('decryptOutput');
+            progress.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            try {
+                const zip = new JSZip();
+                for (const f of extractedFiles) {
+                    const content = await f.file.async('uint8array');
+                    zip.file(f.name, content, { compression: 'DEFLATE', compressionOptions: { level: compressionLevel } });
+                }
+                progressBar.style.width = '50%'; // Before generation
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    if (metadata.percent) {
+                        progressBar.style.width = (50 + metadata.percent * 0.4).toFixed(0) + '%'; // 50-90% for compression
+                    }
+                });
+                progressBar.style.width = '100%';
+
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const base64 = reader.result.split(',')[1];
+
+                    // Append to output (don't replace file list)
+                    output.innerHTML += `
+                        <div class="success" style="margin-top: 20px;">Re-encryption successful (High Comp Level ${compressionLevel})!</div>
+                        <textarea class="textarea" readonly style="margin-top: 10px;">${base64}</textarea>
+                        <button class="btn" onclick="copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy Base64</button>
+                        <a id="downloadReEncryptB64" download="re_encrypted_high_comp.b64" class="btn" style="text-decoration: none;">Download as .b64</a>
+                    `;
+                    document.getElementById('downloadReEncryptB64').href = `data:text/plain;base64,${base64}`;
+
+                    setTimeout(() => {
+                        progress.style.display = 'none';
+                        progressBar.style.width = '0%';
+                    }, 1000);
+                };
+                reader.readAsDataURL(zipBlob);
+            } catch (error) {
+                showError('decryptOutput', 'Re-encryption failed: ' + error.message + ' (High compression may take longer for large files).');
+                progress.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        // Helper Functions
+        function showError(containerId, message) {
+            const existing = document.getElementById(containerId).innerHTML;
+            document.getElementById(containerId).innerHTML = existing + `<div class="error">${message}</div>`;
+        }
+
+        function showSuccess(containerId, message) {
+            const existing = document.getElementById(containerId).innerHTML;
+            document.getElementById(containerId).innerHTML = existing + `<div class="success">${message}</div>`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccess('encryptOutput', 'Base64 copied to clipboard!') || showSuccess('decryptOutput', 'Base64 copied to clipboard!');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showSuccess('encryptOutput', 'Base64 copied to clipboard!') || showSuccess('decryptOutput', 'Base64 copied to clipboard!');
+            });
+        }
+
+        async function viewBase64(index) {
+            const f = extractedFiles[index];
+            const content = await f.file.async('uint8array');
+            const base64 = btoa(String.fromCharCode.apply(null, content));
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+            modal.innerHTML = `
+                <div style="background:white;padding:20px;border-radius:10px;max-width:80%;max-height:80%;overflow:auto;">
+                    <h3>Base64 for ${f.name}</h3>
+                    <textarea style="width:100%;height:200px;font-family:monospace;" readonly>${base64}</textarea>
+                    <button class="btn" onclick="this.parentElement.parentElement.remove(); copyToClipboard('${base64.replace(/'/g, "\\'")}')">Copy & Close</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function downloadFile(index) {
+            const f = extractedFiles[index];
+            const blob = await f.file.async('blob');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = f.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        async function downloadAll(compressionLevel = 9) {
+            if (extractedFiles.length === 0) return;
+
+            const progress = document.getElementById('decryptProgress');
+            const progressBar = document.getElementById('decryptProgressBar');
+            progress.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            try {
+                const zip = new JSZip();
+                for (const f of extractedFiles) {
+                    const content = await f.file.async('uint8array');
+                    zip.file(f.name, content, { compression: 'DEFLATE', compressionOptions: { level: compressionLevel } });
+                }
+                progressBar.style.width = '50%';
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                    if (metadata.percent) {
+                        progressBar.style.width = (50 + metadata.percent * 0.5).toFixed(0) + '%';
+                    }
+                });
+                progressBar.style.width = '100%';
+
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted_files_high_comp.zip';
+                a.click();
+                URL.revokeObjectURL(url);
+
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 1000);
+            } catch (error) {
+                showError('decryptOutput', 'Download failed: ' + error.message + ' (High compression may take longer).');
+                progress.style.display = 'none';
+                progressBar.style.width = '0%';
+            }
+        }
+
+        // Drag & Drop for Encrypt
+        const dropZone = document.querySelector('#encrypt .file-label');
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.style.background = '#e3f2fd';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.background = '#f8f9fa';
+        });
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.style.background = '#f8f9fa';
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                document.getElementById('encryptFile').files = dt.files;
+                handleEncryptFileSelect({ target: { files: dt.files } });
+            }
+        });
+    </script>
+</body>
+</html>
