@@ -60,7 +60,7 @@ No installation needed! This is a single HTML file with embedded CSS and JavaScr
 - GitHub Pages:
 1. Push to a GitHub repo.
 2. Enable Pages in repo settings (source: main branch, `/docs` or root).
-3. Access at `https://YOUR_USERNAME.github.io/encrypt-decrypt-tool/`.
+3. Access at `[https://7abieb.github.io/File64B]`.
 
 - Development:
 - Edit `index.html` directly.
