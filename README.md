@@ -19,7 +19,7 @@ This tool runs entirely in the browser—no server required. It supports files u
 
 ## Demo
 
-- Live Demo: [View on GitHub Pages](https://YOUR_USERNAME.github.io/encrypt-decrypt-tool/) (Replace with your actual repo URL once deployed).
+- Live Demo: [View on GitHub Pages](https://7abieb.github.io/File64B/) (Replace with your actual repo URL once deployed).
 - Screenshots:
 - Encryption tab: Drag/drop a file, click "Encrypt" to get Base64 output.
 - Decryption tab: Paste/upload Base64, extract and download files.
